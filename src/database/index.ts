@@ -5,7 +5,8 @@ const { database, user, password, host } = connection;
 
 const sequelizeConnection = new Sequelize(database, user, password, {
 	host,
-	dialect: 'postgres' as Dialect,
+    port: 5433,
+	dialect: 'postgres',
 });
 
 // Проверка подключения к базе данных
