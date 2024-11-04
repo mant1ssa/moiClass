@@ -68,25 +68,25 @@ export default class LessonService {
             const offset = (queryDto.page - 1) * limit;
 
             const sql = `
-    SELECT l.id, l.date, l.title, l.status,
-           (SELECT COUNT(*) FROM lesson_students ls WHERE ls.lesson_id = l.id AND ls.visit = true) AS visitCount,
-           s.id AS student_id,
-           s.name AS student_name,
-           t.id AS teacher_id,
-           t.name AS teacher_name
-    FROM (
-        SELECT DISTINCT l.id
-        FROM lessons l
-        ${whereClause} 
-        LIMIT ? OFFSET ?
-    ) AS LimitedLessons
-    JOIN lessons l ON LimitedLessons.id = l.id
-    LEFT JOIN lesson_students ls ON l.id = ls.lesson_id
-    LEFT JOIN students s ON ls.student_id = s.id
-    LEFT JOIN lesson_teachers lt ON l.id = lt.lesson_id
-    LEFT JOIN teachers t ON lt.teacher_id = t.id
-    ORDER BY l.id;
-`;
+                SELECT l.id, l.date, l.title, l.status,
+                    (SELECT COUNT(*) FROM lesson_students ls WHERE ls.lesson_id = l.id AND ls.visit = true) AS visitCount,
+                    s.id AS student_id,
+                    s.name AS student_name,
+                    t.id AS teacher_id,
+                    t.name AS teacher_name
+                FROM (
+                    SELECT DISTINCT l.id
+                    FROM lessons l
+                    ${whereClause} 
+                    LIMIT ? OFFSET ?
+                ) AS LimitedLessons
+                JOIN lessons l ON LimitedLessons.id = l.id
+                LEFT JOIN lesson_students ls ON l.id = ls.lesson_id
+                LEFT JOIN students s ON ls.student_id = s.id
+                LEFT JOIN lesson_teachers lt ON l.id = lt.lesson_id
+                LEFT JOIN teachers t ON lt.teacher_id = t.id
+                ORDER BY l.id;
+            `;
 
         replacements.push(limit, offset);
 
@@ -131,7 +131,7 @@ export default class LessonService {
         return formattedLessons
 
         } catch (e) {
-            console.error("Error in getAllLessons:", e);
+            console.error("Error:", e);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
