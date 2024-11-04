@@ -9,11 +9,6 @@ app.use(express.json());
 
 app.use('/api/lesson', lessonRouter);
 
-// app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-//     console.error(err.stack);
-//     res.status(500).send('Something wrong')
-// })
-
 app.listen(process.env.PORT, () => {
     console.log(`Server is listening on port ${process.env.PORT}`)
 })
