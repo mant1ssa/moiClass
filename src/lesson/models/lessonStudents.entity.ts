@@ -1,17 +1,27 @@
 import { DataTypes, Model } from "sequelize";
-import sequelizeConnection from '../../database/index';
+import sequelize from '../../database/index';
+import Lesson from "./lesson.entity";
+import Student from "./student.entity";
 
-class lessonStudents extends Model {
+class LessonStudents extends Model {
     public lesson_id!: number;
     public name!: number;
 }
 
-lessonStudents.init({
+LessonStudents.init({
     lesson_id: {
         type: DataTypes.INTEGER,
+        references: {
+            model: Lesson,
+            key: 'id'
+        }
     },
     student_id: {
         type: DataTypes.INTEGER,
+        references: {
+            model: Student,
+            key: 'id'
+        }
     },
     visit: {
         type: DataTypes.BOOLEAN,
@@ -19,10 +29,13 @@ lessonStudents.init({
     }
 },
 {
-    sequelize: sequelizeConnection,
-    modelName: 'lessonStudents',
+    sequelize: sequelize,
+    modelName: 'LessonStudents',
     tableName: 'lesson_students',
     timestamps: false,
 })
 
-export default lessonStudents
+// LessonStudents.belongsTo(Student, { foreignKey: 'student_id' });
+// LessonStudents.belongsTo(Lesson, { foreignKey: 'lesson_id' });
+
+export default LessonStudents

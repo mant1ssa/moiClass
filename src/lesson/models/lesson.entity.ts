@@ -1,9 +1,10 @@
 import { DataTypes, Model } from "sequelize";
-import sequelizeConnection from '../../database/index';
-import Teacher from "./teacher.entity";
-import lessonTeachers from "./lessonTeachers.entity";
-import Student from "./student.entity";
-import lessonStudents from "./lessonStudents.entity";
+import sequelize from '../../database/index';
+import LessonStudents from "./lessonStudents.entity";
+// import Teacher from "./teacher.entity";
+// import LessonTeachers from "./lessonTeachers.entity";
+// import Student from "./student.entity";
+// import LessonStudents from "./lessonStudents.entity";
 
 class Lesson extends Model {
     public id!: number;
@@ -16,6 +17,7 @@ Lesson.init({
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
     },
     date: {
         type: DataTypes.DATEONLY,
@@ -28,15 +30,13 @@ Lesson.init({
         type: DataTypes.BOOLEAN,
         defaultValue: 0
     }
-},
-{
-    sequelize: sequelizeConnection,
+}, {
+    sequelize: sequelize,
     modelName: 'Lesson',
     tableName: 'lessons',
     timestamps: false,
-})
+});
 
-Lesson.belongsToMany(Teacher, { through: lessonTeachers, foreignKey: 'lesson_id' });
-Lesson.belongsToMany(Student, { through: lessonStudents, foreignKey: 'lesson_id' });
+// Lesson.hasMany(LessonStudents, { foreignKey: 'lesson_id' });
 
-export default Lesson
+export default Lesson;
