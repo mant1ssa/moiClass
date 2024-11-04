@@ -1,16 +1,18 @@
-import { Dialect, Sequelize } from 'sequelize';
+import { Sequelize, DataTypes } from 'sequelize';
 import connection from './config';
 
+// Данные подключения
 const { database, user, password, host } = connection;
 
-const sequelizeConnection = new Sequelize(database, user, password, {
-	host,
-    port: 5433,
-	dialect: 'postgres',
+// Создание экземпляра Sequelize
+const sequelize = new Sequelize(database, user, password, {
+  host,
+  port: 5433,
+  dialect: 'postgres',
 });
 
 // Проверка подключения к базе данных
-sequelizeConnection.authenticate()
+sequelize.authenticate()
   .then(() => {
     console.log('Connection to PostgreSQL has been established successfully.');
   })
@@ -18,4 +20,4 @@ sequelizeConnection.authenticate()
     console.error('Unable to connect to the database:', error);
   });
 
-export default sequelizeConnection;
+export default sequelize;
