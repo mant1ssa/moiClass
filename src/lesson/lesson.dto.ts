@@ -36,11 +36,13 @@ export class LessonsGetDTO {
 
     @IsOptional()
     @IsInt()
+    @Transform(({ value }) => parseInt(value, 10))
     @Min(1)
     page: number = 1
 
     @IsOptional()
     @IsInt()
+    @Transform(({ value }) => parseInt(value, 10))
     @Min(1)
     lessonsPerPage: number = 5
 }

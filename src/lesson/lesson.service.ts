@@ -103,7 +103,7 @@ export default class LessonService {
                     date: lesson.date,
                     title: lesson.title,
                     status: lesson.status,
-                    visitCount: lesson.visitCount,
+                    visitCount: lesson.visitcount,
                     students: [],
                     teachers: []
                 }
