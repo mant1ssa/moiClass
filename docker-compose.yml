@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   database:
@@ -13,23 +13,23 @@ services:
     volumes:
       - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
     ports:
-      - "5433:5432"
+      - "5432:5432"
     command: postgres
     restart: always
 
-  # app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: app
-  #   environment:
-  #     DB_HOST: database
-  #     DB_PORT: 5432
-  #     DB_USER: lesson
-  #     DB_PASSWORD: lesson
-  #     DB_DATABASE: lesson
-  #   ports:
-  #     - "5000:5000"
-  #   depends_on:
-  #     - database
-  #   restart: always
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    environment:
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_USER: lesson
+      DB_PASSWORD: lesson
+      DB_DATABASE: lesson
+    ports:
+      - "5000:5000"
+    depends_on:
+      - database
+    restart: always
