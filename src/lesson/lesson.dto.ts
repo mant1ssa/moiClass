@@ -31,6 +31,16 @@ export class LessonsGetDTO {
     @IsOptional()
     @IsArray()
     @IsInt({ each: true })
+    @Transform(({ value }) => {
+        if (typeof value === 'string') {
+            try {
+                return JSON.parse(value); // Преобразуем строку в массив
+            } catch (e) {
+                throw new Error(`Invalid JSON string: ${value}`); // Обработка ошибок
+            }
+        }
+        return value; // Возвращаем значение как есть, если это не строка
+    })
     // @Validate(IsNumberOrString)
     studentsCount!: string[]
 

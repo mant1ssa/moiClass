@@ -1,12 +1,9 @@
 import { Request, Response } from "express";
-import { Lesson, LessonStudents, Student, Teacher, associations } from '../database/models';
 import { plainToClass } from 'class-transformer';
 import { LessonsGetDTO } from './lesson.dto';
 import { validate } from 'class-validator';
 import { Op, QueryTypes } from 'sequelize';
 import sequelize from "../database";
-
-associations()
 
 export default class LessonService {
     async getAllLessons(req: Request, res: Response) {
@@ -15,7 +12,6 @@ export default class LessonService {
 
             const errors = await validate(queryDto);
             if (errors.length > 0) {
-                // Если есть ошибки валидации, возвращаем их
                 return res.status(400).json({
                     message: "Validation error",
                     errors: errors.map((error) => ({
@@ -53,40 +49,38 @@ export default class LessonService {
             if (queryDto.studentsCount !== undefined) {
                 if(queryDto.studentsCount.length === 1) {
                     whereClauses.push('(SELECT COUNT(*) FROM lesson_students ls WHERE ls.lesson_id = l.id AND ls.visit = true) = ?');
-                    replacements.push(queryDto.studentsCount[0]);
+                    replacements.push(parseInt(queryDto.studentsCount[0]));
                 } else {
                     whereClauses.push('(SELECT COUNT(*) FROM lesson_students ls WHERE ls.lesson_id = l.id AND ls.visit = true) BETWEEN ? AND ?');
-                    replacements.push(queryDto.studentsCount[0], queryDto.studentsCount[1]);
+                    replacements.push(parseInt(queryDto.studentsCount[0]), parseInt(queryDto.studentsCount[1]));
                 }
             }
 
             let whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
             whereClause += ' ORDER BY l.id'
-            console.log("----")
-            console.log(whereClauses)
             const limit = Number(queryDto.lessonsPerPage);
             const offset = (queryDto.page - 1) * limit;
 
             const sql = `
-    SELECT l.id, l.date, l.title, l.status,
-           (SELECT COUNT(*) FROM lesson_students ls WHERE ls.lesson_id = l.id AND ls.visit = true) AS visitCount,
-           s.id AS student_id,
-           s.name AS student_name,
-           t.id AS teacher_id,
-           t.name AS teacher_name
-    FROM (
-        SELECT DISTINCT l.id
-        FROM lessons l
-        ${whereClause} 
-        LIMIT ? OFFSET ?
-    ) AS LimitedLessons
-    JOIN lessons l ON LimitedLessons.id = l.id
-    LEFT JOIN lesson_students ls ON l.id = ls.lesson_id
-    LEFT JOIN students s ON ls.student_id = s.id
-    LEFT JOIN lesson_teachers lt ON l.id = lt.lesson_id
-    LEFT JOIN teachers t ON lt.teacher_id = t.id
-    ORDER BY l.id;
-`;
+                SELECT l.id, l.date, l.title, l.status,
+                    (SELECT COUNT(*) FROM lesson_students ls WHERE ls.lesson_id = l.id AND ls.visit = true) AS visitCount,
+                    s.id AS student_id,
+                    s.name AS student_name,
+                    t.id AS teacher_id,
+                    t.name AS teacher_name
+                FROM (
+                    SELECT DISTINCT l.id
+                    FROM lessons l
+                    ${whereClause} 
+                    LIMIT ? OFFSET ?
+                ) AS LimitedLessons
+                JOIN lessons l ON LimitedLessons.id = l.id
+                LEFT JOIN lesson_students ls ON l.id = ls.lesson_id
+                LEFT JOIN students s ON ls.student_id = s.id
+                LEFT JOIN lesson_teachers lt ON l.id = lt.lesson_id
+                LEFT JOIN teachers t ON lt.teacher_id = t.id
+                ORDER BY l.id;
+            `;
 
         replacements.push(limit, offset);
 
@@ -131,7 +125,7 @@ export default class LessonService {
         return formattedLessons
 
         } catch (e) {
-            console.error("Error in getAllLessons:", e);
+            console.error("Error:", e);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
     }
