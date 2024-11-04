@@ -1,21 +1,18 @@
 import { Request, Response } from "express";
-import { Lesson, LessonStudents, Student, Teacher, associations } from '../database/models';
 import { plainToClass } from 'class-transformer';
 import { LessonsGetDTO } from './lesson.dto';
 import { validate } from 'class-validator';
 import { Op, QueryTypes } from 'sequelize';
 import sequelize from "../database";
 
-associations()
-
 export default class LessonService {
     async getAllLessons(req: Request, res: Response) {
         try {
             const queryDto = plainToClass(LessonsGetDTO, req.query);
 
+            // Провалидиирую что нам прислал клиент
             const errors = await validate(queryDto);
             if (errors.length > 0) {
-                // Если есть ошибки валидации, возвращаем их
                 return res.status(400).json({
                     message: "Validation error",
                     errors: errors.map((error) => ({
@@ -25,9 +22,10 @@ export default class LessonService {
                 });
             }
 
-            const whereClauses: string[] = [];
-            const replacements: any = [];
+            const whereClauses: string[] = [];  // Массив будет по каждому полю строки запроса собирать условие (если есть)
+            const replacements: any = [];       // Массив собирающий подстановочные значения (на места ?)
 
+            // Тут проверяю дату, надо будет поменять тип string на Date позже
             if (queryDto.date !== undefined) {
                 const dates = queryDto.date.split(',');
                 if (dates.length === 1) {
@@ -44,29 +42,33 @@ export default class LessonService {
                 replacements.push(queryDto.status);
             }
 
+            // Получили массив ИД учителей
             if (queryDto.teacherIds !== undefined && queryDto.teacherIds && queryDto.teacherIds.length > 0) {
                 const ids = queryDto.teacherIds.map(id => parseInt(id.trim()));
                 whereClauses.push('lt.teacher_id IN (?)');
                 replacements.push(ids);
             }
 
+            // Смотрю, получил 1 или два значения
             if (queryDto.studentsCount !== undefined) {
                 if(queryDto.studentsCount.length === 1) {
                     whereClauses.push('(SELECT COUNT(*) FROM lesson_students ls WHERE ls.lesson_id = l.id AND ls.visit = true) = ?');
-                    replacements.push(queryDto.studentsCount[0]);
+                    replacements.push(parseInt(queryDto.studentsCount[0]));
                 } else {
                     whereClauses.push('(SELECT COUNT(*) FROM lesson_students ls WHERE ls.lesson_id = l.id AND ls.visit = true) BETWEEN ? AND ?');
-                    replacements.push(queryDto.studentsCount[0], queryDto.studentsCount[1]);
+                    replacements.push(parseInt(queryDto.studentsCount[0]), parseInt(queryDto.studentsCount[1]));
                 }
             }
 
+            // Собираем в норм вид получившиеся фильтры
             let whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
             whereClause += ' ORDER BY l.id'
-            console.log("----")
-            console.log(whereClauses)
+
+            // Пагинация
             const limit = Number(queryDto.lessonsPerPage);
             const offset = (queryDto.page - 1) * limit;
 
+            // Понимаю что это не ОРМ, когда дойду до личной беседы с тимлидом то я смогу ему пояснить ход этой работы)
             const sql = `
                 SELECT l.id, l.date, l.title, l.status,
                     (SELECT COUNT(*) FROM lesson_students ls WHERE ls.lesson_id = l.id AND ls.visit = true) AS visitCount,
@@ -96,6 +98,7 @@ export default class LessonService {
             plain: false
         });
 
+        // Внизу некрасиво но эффективно группирую переформирую результат сырого запроса
         const formattedLessons = results.reduce((acc: any, lesson: any) => {
             if(!acc[lesson.id]) {
                 acc[lesson.id] = {

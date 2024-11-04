@@ -1,17 +1,15 @@
 import { Sequelize, DataTypes } from 'sequelize';
 import connection from './config';
 
-// Данные подключения
 const { database, user, password, host } = connection;
 
-// Создание экземпляра Sequelize
 const sequelize = new Sequelize(database, user, password, {
   host,
   port: Number(process.env.DB_PORT),
   dialect: 'postgres',
 });
 
-// Проверка подключения к базе данных
+// Проверяем подключение
 sequelize.authenticate()
   .then(() => {
     console.log('Connection to PostgreSQL has been established successfully.');

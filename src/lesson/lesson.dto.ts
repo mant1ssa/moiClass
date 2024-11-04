@@ -1,16 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsOptional, Min, Max, IsInt, IsArray, ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments, Validate } from "class-validator";
-
-@ValidatorConstraint({ name: 'string-or-number', async: false })
-export class IsNumberOrString implements ValidatorConstraintInterface {
-  validate(value: any, args: ValidationArguments) {
-    return typeof value === 'number' || typeof value === 'string';
-  }
-
-  defaultMessage(args: ValidationArguments) {
-    return `Value must be a number or a string.`;
-  }
-}
+import { IsOptional, Min, Max, IsInt, IsArray } from "class-validator";
 
 export class LessonsGetDTO {
     @IsOptional()
@@ -31,7 +20,16 @@ export class LessonsGetDTO {
     @IsOptional()
     @IsArray()
     @IsInt({ each: true })
-    // @Validate(IsNumberOrString)
+    @Transform(({ value }) => {
+        if (typeof value === 'string') {
+            try {
+                return JSON.parse(value);
+            } catch (e) {
+                throw new Error(`Invalid JSON string: ${value}`);
+            }
+        }
+        return value;
+    })
     studentsCount!: string[]
 
     @IsOptional()
