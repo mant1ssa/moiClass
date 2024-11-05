@@ -100,36 +100,44 @@ export default class LessonService {
 
         // Внизу некрасиво но эффективно группирую переформирую результат сырого запроса
         const formattedLessons = results.reduce((acc: any, lesson: any) => {
-            if(!acc[lesson.id]) {
-                acc[lesson.id] = {
+            // Ищем существующий урок в массиве
+            let existingLesson = acc.find((l: any) => l.id === lesson.id);
+        
+            // Если урока еще нет, создаем его и добавляем в массив
+            if (!existingLesson) {
+                existingLesson = {
                     id: lesson.id,
                     date: lesson.date,
                     title: lesson.title,
                     status: lesson.status,
-                    visitCount: lesson.visitcount,
+                    visitCount: lesson.visitCount,
                     students: [],
                     teachers: []
-                }
+                };
+                acc.push(existingLesson);
             }
-
-            if((!acc[lesson.id].students.find((el: any) => el.id == lesson.student_id)) && (lesson.student_id != null)) {
-                acc[lesson.id].students.push({
+        
+            // Добавляем студента, если его еще нет в списке студентов
+            if (lesson.student_id && !existingLesson.students.find((s: any) => s.id === lesson.student_id)) {
+                existingLesson.students.push({
                     id: lesson.student_id,
                     name: lesson.student_name,
                     visit: true
-                })
+                });
             }
-
-            if((!acc[lesson.id].teachers.find((el: any) => el.id == lesson.teacher_id)) && (lesson.teacher_id != null)) {
-                acc[lesson.id].teachers.push({
+        
+            // Добавляем учителя, если его еще нет в списке учителей
+            if (lesson.teacher_id && !existingLesson.teachers.find((t: any) => t.id === lesson.teacher_id)) {
+                existingLesson.teachers.push({
                     id: lesson.teacher_id,
-                    name: lesson.teacher_name,
-                })
+                    name: lesson.teacher_name
+                });
             }
-
+        
             return acc;
-
-        }, {});
+        
+        }, []);
+        
 
         return formattedLessons
 

@@ -13,7 +13,7 @@ services:
     volumes:
       - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
     ports:
-      - "5432:5432"
+      - "5433:5432"
     command: postgres
     restart: always
 
