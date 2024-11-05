@@ -100,8 +100,10 @@ export default class LessonService {
 
         // Внизу некрасиво но эффективно группирую переформирую результат сырого запроса
         const formattedLessons = results.reduce((acc: any, lesson: any) => {
-            if(!acc[lesson.id]) {
-                acc[lesson.id] = {
+            let ifLessonExists = acc.find((l: any) => l.id === lesson.id);
+        
+            if (!ifLessonExists) {
+                ifLessonExists = {
                     id: lesson.id,
                     date: lesson.date,
                     title: lesson.title,
@@ -109,27 +111,29 @@ export default class LessonService {
                     visitCount: lesson.visitcount,
                     students: [],
                     teachers: []
-                }
+                };
+                acc.push(ifLessonExists);
             }
-
-            if((!acc[lesson.id].students.find((el: any) => el.id == lesson.student_id)) && (lesson.student_id != null)) {
-                acc[lesson.id].students.push({
+        
+            if (lesson.student_id && !ifLessonExists.students.find((s: any) => s.id === lesson.student_id)) {
+                ifLessonExists.students.push({
                     id: lesson.student_id,
                     name: lesson.student_name,
                     visit: true
-                })
+                });
             }
-
-            if((!acc[lesson.id].teachers.find((el: any) => el.id == lesson.teacher_id)) && (lesson.teacher_id != null)) {
-                acc[lesson.id].teachers.push({
+        
+            if (lesson.teacher_id && !ifLessonExists.teachers.find((t: any) => t.id === lesson.teacher_id)) {
+                ifLessonExists.teachers.push({
                     id: lesson.teacher_id,
-                    name: lesson.teacher_name,
-                })
+                    name: lesson.teacher_name
+                });
             }
-
+        
             return acc;
-
-        }, {});
+        
+        }, []);
+        
 
         return formattedLessons
 
