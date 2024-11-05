@@ -100,35 +100,31 @@ export default class LessonService {
 
         // Внизу некрасиво но эффективно группирую переформирую результат сырого запроса
         const formattedLessons = results.reduce((acc: any, lesson: any) => {
-            // Ищем существующий урок в массиве
-            let existingLesson = acc.find((l: any) => l.id === lesson.id);
+            let ifLessonExists = acc.find((l: any) => l.id === lesson.id);
         
-            // Если урока еще нет, создаем его и добавляем в массив
-            if (!existingLesson) {
-                existingLesson = {
+            if (!ifLessonExists) {
+                ifLessonExists = {
                     id: lesson.id,
                     date: lesson.date,
                     title: lesson.title,
                     status: lesson.status,
-                    visitCount: lesson.visitCount,
+                    visitCount: lesson.visitcount,
                     students: [],
                     teachers: []
                 };
-                acc.push(existingLesson);
+                acc.push(ifLessonExists);
             }
         
-            // Добавляем студента, если его еще нет в списке студентов
-            if (lesson.student_id && !existingLesson.students.find((s: any) => s.id === lesson.student_id)) {
-                existingLesson.students.push({
+            if (lesson.student_id && !ifLessonExists.students.find((s: any) => s.id === lesson.student_id)) {
+                ifLessonExists.students.push({
                     id: lesson.student_id,
                     name: lesson.student_name,
                     visit: true
                 });
             }
         
-            // Добавляем учителя, если его еще нет в списке учителей
-            if (lesson.teacher_id && !existingLesson.teachers.find((t: any) => t.id === lesson.teacher_id)) {
-                existingLesson.teachers.push({
+            if (lesson.teacher_id && !ifLessonExists.teachers.find((t: any) => t.id === lesson.teacher_id)) {
+                ifLessonExists.teachers.push({
                     id: lesson.teacher_id,
                     name: lesson.teacher_name
                 });
